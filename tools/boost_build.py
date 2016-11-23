@@ -94,9 +94,7 @@ if platform == 'linux':
 elif platform == 'windows':
   shell_cmd = 'bootstrap.bat'
 
-first_cmd = '%s --prefix=%s --libdir=%s --includedir=%s' \
-    % (shell_cmd, install_root_path, install_library_path, install_include_path)
-run(first_cmd, boost_dir)
+run(shell_cmd, boost_dir)
 
 
 # Build and install Boost
@@ -105,9 +103,12 @@ if platform == 'linux':
 elif platform == 'windows':
   shell_cmd = 'b2'
 
-second_cmd = '%s variant=%s link=shared threading=multi install' \
+shell_cmd = '%s --prefix=%s --libdir=%s --includedir=%s' \
+    % (shell_cmd, install_root_path, install_library_path, install_include_path)
+shell_cmd = '%s variant=%s link=shared threading=multi install' \
     % (shell_cmd, build_type)
-run(second_cmd, boost_dir)
+
+run(shell_cmd, boost_dir)
 
 sys.stdout.write('--- Installed root path : "%s"\n' % install_root_path)
 sys.stdout.write('--- Installed library path : "%s"\n' % install_library_path)
