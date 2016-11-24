@@ -92,12 +92,18 @@ sys.stdout.write('--- installing include path : "%s"\n' % install_include_path)
 # Delete the pre-installed library directory
 if os.path.isdir(install_library_path):
   sys.stdout.write('--- Delete the pre-installed library directory...\n')
-  shutil.rmtree(install_library_path)
+  if platform == 'linux':
+    run('sudo rm -rf ' + install_library_path, root_dir)
+  elif platform == 'windows':
+    shutil.rmtree(install_library_path)
 
 # Delete the pre-installed include directory
 if os.path.isdir(os.path.join(install_include_path, 'boost')):
   sys.stdout.write('--- Delete the pre-installed include directory...\n')
-  shutil.rmtree(os.path.join(install_include_path, 'boost'))
+  if platform == 'linux':
+    run('sudo rm -rf ' + os.path.join(install_include_path, 'boost'), root_dir)
+  elif platform == 'windows':
+    shutil.rmtree(os.path.join(install_include_path, 'boost'))
 
 
 # Prepare Boost for building.
