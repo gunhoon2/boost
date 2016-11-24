@@ -3,6 +3,7 @@
 
 import os
 import sys
+import shutil
 import subprocess
 from optparse import OptionParser
 
@@ -58,7 +59,7 @@ else:
 sys.stdout.write('--- build type : %s\n\n' % build_type)
 
 
-# base directories
+# Set base directories
 tools_dir = os.path.dirname(__file__)
 root_dir = os.path.join(tools_dir, os.pardir)
 boost_dir = os.path.join(root_dir, 'boost_' + boost_version.replace('.', '_'))
@@ -74,7 +75,7 @@ if not os.path.isdir(boost_dir):
   sys.exit()
 
 
-# install directory ("/usr/local" on Linux, "{root_dir}/install" on Windows)
+# Set install directory ("/usr/local" on Linux, "{root_dir}/install" on Windows)
 if platform == 'linux':
   install_root_path = os.path.abspath('/usr/local')
 elif platform == 'windows':
@@ -86,6 +87,17 @@ install_include_path = os.path.join(install_root_path, 'include')
 sys.stdout.write('--- installing root path : "%s"\n' % install_root_path)
 sys.stdout.write('--- installing library path : "%s"\n' % install_library_path)
 sys.stdout.write('--- installing include path : "%s"\n' % install_include_path)
+
+
+# Delete the pre-installed library directory
+if os.path.isdir(install_library_path):
+  sys.stdout.write('--- Delete the pre-installed library directory...\n')
+  shutil.rmtree(install_library_path)
+
+# Delete the pre-installed include directory
+if os.path.isdir(os.path.join(install_include_path, 'boost')):
+  sys.stdout.write('--- Delete the pre-installed include directory...\n')
+  shutil.rmtree(os.path.join(install_include_path, 'boost'))
 
 
 # Prepare Boost for building.
@@ -113,5 +125,18 @@ run(shell_cmd, boost_dir)
 sys.stdout.write('--- Installed root path : "%s"\n' % install_root_path)
 sys.stdout.write('--- Installed library path : "%s"\n' % install_library_path)
 sys.stdout.write('--- Installed include path : "%s"\n' % install_include_path)
-sys.stdout.write('--- Boost build and installation are completed...\n')
 
+
+# On Windows, installed include directory is as follows.
+# {install_root_path}/include/boost-1_62/boost
+# Delete "boost-1_62" and change the directory structure as below.
+# {install_root_path}/include/boost
+if platform == 'windows':
+  temp_inc_dir = 'boost-%s' % boost_version[0:4].replace('.', '_')
+  temp_src_dir = os.path.join(install_include_path, temp_inc_dir, 'boost')
+  temp_dst_dir = os.path.join(install_include_path, 'boost')
+  if os.path.isdir(temp_src_dir):
+    shutil.move(temp_src_dir, temp_dst_dir)
+    shutil.rmtree(os.path.join(install_include_path, temp_inc_dir))
+
+sys.stdout.write('--- Boost build and installation are completed...\n')
